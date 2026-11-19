@@ -1,0 +1,87 @@
+{
+  "wiki_title": "社會心理學 LLM Wiki",
+  "collection": "團體歷程與社會影響",
+  "version": "0.1.0",
+  "language": "zh-TW",
+  "ingestion_status": "prepared-not-yet-published-to-github",
+  "retrieval_method": "client-side keyword overlap with simple term normalization; not vector embeddings",
+  "sources": [
+    {
+      "source_id": "S01",
+      "file": "sources/S01_group_basics.md",
+      "title": "團體的基本概念",
+      "chapter": [
+        "第九章"
+      ],
+      "status": "needs-verification",
+      "terms": [
+        "團體",
+        "團體凝聚",
+        "社會角色",
+        "交換記憶"
+      ]
+    },
+    {
+      "source_id": "S02",
+      "file": "sources/S02_individual_behavior.md",
+      "title": "團體中的個人行為",
+      "chapter": [
+        "第九章"
+      ],
+      "status": "needs-verification",
+      "terms": [
+        "社會助長作用",
+        "社會性懈怠",
+        "去個人化"
+      ]
+    },
+    {
+      "source_id": "S03",
+      "file": "sources/S03_group_decisions.md",
+      "title": "團體決策與團體問題",
+      "chapter": [
+        "第九章"
+      ],
+      "status": "needs-verification",
+      "terms": [
+        "團體極化現象",
+        "團體迷思",
+        "歷程損耗"
+      ]
+    },
+    {
+      "source_id": "S04",
+      "file": "sources/S04_conflict_cooperation.md",
+      "title": "衝突與合作",
+      "chapter": [
+        "第九章"
+      ],
+      "status": "needs-verification",
+      "terms": [
+        "協商",
+        "整合式解決辦法",
+        "以牙還牙策略",
+        "社會困境"
+      ]
+    },
+    {
+      "source_id": "S05",
+      "file": "sources/S05_social_influence_leadership.md",
+      "title": "社會影響與領導",
+      "chapter": [
+        "第八章",
+        "第九章"
+      ],
+      "status": "needs-verification",
+      "terms": [
+        "服從",
+        "權變領導理論",
+        "任務導向的領導者",
+        "關係導向的領導者",
+        "交易型領袖",
+        "變革型領袖",
+        "偉人理論"
+      ]
+    }
+  ]
+}

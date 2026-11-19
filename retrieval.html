@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>團體歷程與社會影響｜Wiki 檢索測試</title>
+<style>
+:root{--ink:#202321;--muted:#68716b;--paper:#f5f4ef;--card:#fff;--line:#dcded7;--accent:#3d6b58;--soft:#e8eee9}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:system-ui,-apple-system,"Noto Sans TC",sans-serif;line-height:1.65}
+main{max-width:920px;margin:0 auto;padding:36px 20px 64px}header{margin-bottom:28px}h1{font-size:clamp(28px,5vw,42px);line-height:1.2;margin:8px 0 12px}.eyebrow{letter-spacing:.12em;color:var(--accent);font-size:12px;font-weight:700}.muted{color:var(--muted)}.panel{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px;margin:16px 0}
+label{display:block;font-weight:700;margin-bottom:8px}input{width:100%;font:inherit;padding:13px 14px;border:1px solid #bfc7bf;border-radius:10px;background:#fff}
+button{font:inherit;border:0;border-radius:10px;padding:11px 18px;background:var(--accent);color:white;cursor:pointer;margin-top:12px}button.secondary{background:#e9ece8;color:var(--ink);margin-left:8px}
+.result{border-top:1px solid var(--line);padding:16px 0}.result:first-child{border-top:0}.tag{display:inline-block;background:var(--soft);color:var(--accent);padding:2px 9px;border-radius:99px;font-size:12px;margin-right:6px}.score{font-variant-numeric:tabular-nums;color:var(--accent);font-weight:700}.excerpt{white-space:pre-wrap}.status{font-size:13px;padding:10px 12px;border-radius:10px;background:#f2f1e9}.footer{font-size:13px;color:var(--muted);margin-top:28px}
+</style></head>
+<body><main>
+<header><div class="eyebrow">SOCIAL PSYCHOLOGY · LLM WIKI</div><h1>團體歷程與社會影響</h1><p class="muted">Wiki ingestion / retrieval 測試介面。輸入問題，系統會從五份 Markdown 知識文件找出相關片段，並顯示來源。</p></header>
+<section class="panel">
+<label for="q">輸入你想查詢的問題</label><input id="q" placeholder="例如：團體極化和團體迷思有什麼不同？">
+<button id="search">搜尋 Wiki</button><button class="secondary" id="examples">載入測試問題</button>
+<p id="status" class="status" role="status">準備載入知識庫……</p>
+</section>
+<section class="panel"><h2>檢索結果</h2><div id="results" class="muted">尚未執行查詢。</div></section>
+<section class="panel"><h2>目前檢索方式</h2><p>此 GitHub Pages 版本使用瀏覽器端關鍵詞重疊比對，依命中詞數排序，並顯示 Markdown 來源文件。它是可在靜態網站運作的檢索原型，<strong>不是向量資料庫，也不會自行呼叫 LLM 生成答案</strong>。</p><p>若要升級成真正的語意檢索／RAG，下一階段可加入 embeddings、向量索引與安全的後端 LLM API；API 金鑰不可放在公開 GitHub 前端。</p></section>
+<p class="footer">來源狀態：本批內容為依對話中圖片轉錄整理的初版，尚待逐張核對原圖；請勿將未核對定義當成已驗證教材原文。</p>
+</main>
+<script>
+const manifestUrl="./ingest-manifest.json";
+let docs=[];
+const $=id=>document.getElementById(id);
+function tokens(s){
+ const out=[];
+ const parts=s.toLowerCase().match(/[a-z0-9]+|[\u3400-\u9fff]+/g)||[];
+ for(const p of parts){
+  if(/^[\u3400-\u9fff]+$/.test(p)){
+   if(p.length===1)out.push(p);
+   else for(let i=0;i<p.length-1;i++)out.push(p.slice(i,i+2));
+  }else if(p.length>1)out.push(p);
+ }
+ return [...new Set(out)].filter(x=>!["什麼","有什","不同","如何","是否","以及","這個","那個"].includes(x));
+}
+function splitChunks(text){return text.split(/(?=^## )/m).filter(x=>x.trim()).map(x=>x.trim())}
+async function load(){
+ try{
+  const m=await fetch(manifestUrl).then(r=>{if(!r.ok)throw Error("無法讀取 manifest");return r.json()});
+  const loaded=await Promise.all(m.sources.map(async s=>{
+   const raw=await fetch("./"+s.file).then(r=>{if(!r.ok)throw Error("無法讀取 "+s.file);return r.text()});
+   return {meta:s,raw,chunks:splitChunks(raw.replace(/^---[\s\S]*?---\s*/,""))};
+  }));
+  docs=loaded;$("status").textContent=`知識庫載入完成：${docs.length} 份來源文件。這代表前端已能讀取五份 Markdown 文件；尚未建立向量索引。`;
+ }catch(e){$("status").textContent="載入失敗："+e.message+"。請確認此資料夾已部署到 GitHub Pages，且路徑大小寫正確。"}
+}
+function search(){
+ const q=$("q").value.trim();if(!q){$("status").textContent="請先輸入查詢問題。";return}
+ if(!docs.length){$("status").textContent="知識文件尚未載入。";return}
+ const qs=[...new Set(tokens(q))];
+ const ranked=[];
+ for(const d of docs) for(const c of d.chunks){
+  const hay=(c+" "+d.meta.title+" "+d.meta.terms.join(" ")).toLowerCase();
+  const hits=qs.filter(t=>hay.includes(t));
+  if(hits.length)ranked.push({d,c,hits,score:hits.length/Math.max(qs.length,1)});
+ }
+ ranked.sort((a,b)=>b.hits.length-a.hits.length);
+ const top=ranked.slice(0,8);
+ $("status").textContent=`查詢詞 ${qs.length} 個；找到 ${ranked.length} 個候選片段，顯示前 ${top.length} 筆。`;
+ $("results").innerHTML=top.length?top.map(x=>`<article class="result"><div><span class="tag">${x.d.meta.source_id}</span><span class="tag">${x.d.meta.chapter.join("、")}</span><span class="score">命中 ${x.hits.length} 詞</span></div><h3>${escapeHtml(x.d.meta.title)}</h3><p class="muted">檔案：${escapeHtml(x.d.meta.file)}</p><div class="excerpt">${escapeHtml(x.c.slice(0,1100))}${x.c.length>1100?"……":""}</div><p class="muted">命中詞：${x.hits.map(escapeHtml).join("、")}</p></article>`).join(""):"沒有找到符合的片段。請嘗試使用名詞原文查詢，或回頭檢查 ingestion 文件是否包含該概念。";
+}
+function escapeHtml(s){return s.replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+$("search").addEventListener("click",search);
+$("q").addEventListener("keydown",e=>{if(e.key==="Enter")search()});
+$("examples").addEventListener("click",()=>{$("q").value="團體極化和團體迷思有什麼不同？";search()});
+load();
+</script></body></html>

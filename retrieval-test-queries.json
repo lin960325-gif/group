@@ -1,0 +1,32 @@
+[
+  {
+    "id": "Q01",
+    "query": "什麼是團體？",
+    "expected_source": "S01",
+    "expected_concept": "團體"
+  },
+  {
+    "id": "Q02",
+    "query": "社會助長作用和社會性懈怠有什麼不同？",
+    "expected_source": "S02",
+    "expected_concept": "社會助長作用、社會性懈怠"
+  },
+  {
+    "id": "Q03",
+    "query": "團體極化和團體迷思有什麼差異？",
+    "expected_source": "S03",
+    "expected_concept": "團體極化現象、團體迷思"
+  },
+  {
+    "id": "Q04",
+    "query": "什麼是以牙還牙策略？",
+    "expected_source": "S04",
+    "expected_concept": "以牙還牙策略"
+  },
+  {
+    "id": "Q05",
+    "query": "服從是什麼？",
+    "expected_source": "S05",
+    "expected_concept": "服從"
+  }
+]
